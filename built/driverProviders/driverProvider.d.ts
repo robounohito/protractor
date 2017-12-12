@@ -1,4 +1,3 @@
-/// <reference types="selenium-webdriver" />
 /// <reference types="q" />
 /**
  *  This is a base driver provider class.
@@ -6,7 +5,7 @@
  *  it down, and setting up the driver correctly.
  */
 import * as q from 'q';
-import { WebDriver } from 'selenium-webdriver';
+import { promise as wdpromise, WebDriver } from 'selenium-webdriver';
 import { Config } from '../config';
 export declare abstract class DriverProvider {
     drivers_: WebDriver[];
@@ -34,7 +33,13 @@ export declare abstract class DriverProvider {
      * @public
      * @param webdriver instance
      */
-    quitDriver(driver: WebDriver): q.Promise<WebDriver>;
+    quitDriver(driver: WebDriver): wdpromise.Promise<void>;
+    /**
+     * Quits an array of drivers and returns a q promise instead of a webdriver one
+     *
+     * @param drivers {webdriver.WebDriver[]} The webdriver instances
+     */
+    static quitDrivers(provider: DriverProvider, drivers: WebDriver[]): q.Promise<void>;
     /**
      * Default update job method.
      * @return a promise
@@ -54,8 +59,7 @@ export declare abstract class DriverProvider {
      * Shuts down the drivers.
      *
      * @public
-     * @return {q.promise} A promise which will resolve when the environment
-     *     is down.
+     * @return {q.Promise<any>} A promise which will resolve when the environment is down.
      */
-    teardownEnv(): q.Promise<q.Promise<WebDriver>[]>;
+    teardownEnv(): q.Promise<any>;
 }

@@ -1,6 +1,9 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const selenium_webdriver_1 = require("selenium-webdriver");
+const locators_1 = require("./locators");
 const logger_1 = require("./logger");
+const util_1 = require("./util");
 let clientSideScripts = require('./clientsidescripts');
 let logger = new logger_1.Logger('element');
 class WebdriverWebElement {
@@ -8,7 +11,7 @@ class WebdriverWebElement {
 exports.WebdriverWebElement = WebdriverWebElement;
 let WEB_ELEMENT_FUNCTIONS = [
     'click', 'sendKeys', 'getTagName', 'getCssValue', 'getAttribute', 'getText', 'getSize',
-    'getLocation', 'isEnabled', 'isSelected', 'submit', 'clear', 'isDisplayed', 'getId', 'serialize',
+    'getLocation', 'isEnabled', 'isSelected', 'submit', 'clear', 'isDisplayed', 'getId',
     'takeScreenshot'
 ];
 /**
@@ -149,7 +152,7 @@ class ElementArrayFinder extends WebdriverWebElement {
                 // This is the first time we are looking for an element
                 return ptor.waitForAngular('Locator: ' + locator)
                     .then(() => {
-                    if (locator.findElementsOverride) {
+                    if (locators_1.isProtractorLocator(locator)) {
                         return locator.findElementsOverride(ptor.driver, null, ptor.rootEl);
                     }
                     else {
@@ -162,7 +165,7 @@ class ElementArrayFinder extends WebdriverWebElement {
                     // For each parent web element, find their children and construct
                     // a list of Promise<List<child_web_element>>
                     let childrenPromiseList = parentWebElements.map((parentWebElement) => {
-                        return locator.findElementsOverride ?
+                        return locators_1.isProtractorLocator(locator) ?
                             locator.findElementsOverride(ptor.driver, parentWebElement, ptor.rootEl) :
                             parentWebElement.findElements(locator);
                     });
@@ -409,6 +412,21 @@ class ElementArrayFinder extends WebdriverWebElement {
         });
     }
     /**
+     * Returns true if there are any elements present that match the finder.
+     *
+     * @alias element.all(locator).isPresent()
+     *
+     * @example
+     * expect($('.item').isPresent()).toBeTruthy();
+     *
+     * @returns {Promise<boolean>}
+     */
+    isPresent() {
+        return this.count().then((count) => {
+            return count > 0;
+        });
+    }
+    /**
      * Returns the most relevant locator.
      *
      * @example
@@ -441,19 +459,30 @@ class ElementArrayFinder extends WebdriverWebElement {
         let callerError = new Error();
         let actionResults = this.getWebElements()
             .then((arr) => selenium_webdriver_1.promise.all(arr.map(actionFn)))
-            .then(null, (e) => {
-            let noSuchErr;
-            if (e instanceof Error) {
-                noSuchErr = e;
-                noSuchErr.stack = noSuchErr.stack + callerError.stack;
+            .then((value) => {
+            return { passed: true, value: value };
+        }, (error) => {
+            return { passed: false, value: error };
+        });
+        let getWebElements = () => actionResults.then(() => this.getWebElements());
+        actionResults = actionResults.then((result) => {
+            if (result.passed) {
+                return result.value;
             }
             else {
-                noSuchErr = new Error(e);
-                noSuchErr.stack = callerError.stack;
+                let noSuchErr;
+                if (result.value instanceof Error) {
+                    noSuchErr = result.value;
+                    noSuchErr.stack = noSuchErr.stack + callerError.stack;
+                }
+                else {
+                    noSuchErr = new Error(result.value);
+                    noSuchErr.stack = callerError.stack;
+                }
+                throw noSuchErr;
             }
-            throw noSuchErr;
         });
-        return new ElementArrayFinder(this.browser_, this.getWebElements, this.locator_, actionResults);
+        return new ElementArrayFinder(this.browser_, getWebElements, this.locator_, actionResults);
     }
     /**
      * Represents the ElementArrayFinder as an array of ElementFinders.
@@ -647,7 +676,7 @@ class ElementArrayFinder extends WebdriverWebElement {
      *     value of the accumulator.
      */
     reduce(reduceFn, initialValue) {
-        let valuePromise = selenium_webdriver_1.promise.fulfilled(initialValue);
+        let valuePromise = selenium_webdriver_1.promise.when(initialValue);
         return this.asElementFinders_().then((arr) => {
             return arr.reduce((valuePromise, elementFinder, index) => {
                 return valuePromise.then((value) => {
@@ -806,7 +835,7 @@ class ElementFinder extends WebdriverWebElement {
     }
     static fromWebElement_(browser, webElem, locator) {
         let getWebElements = () => {
-            return selenium_webdriver_1.promise.fulfilled([webElem]);
+            return selenium_webdriver_1.promise.when([webElem]);
         };
         return new ElementArrayFinder(browser, getWebElements, locator).toElementFinder_();
     }
@@ -845,7 +874,7 @@ class ElementFinder extends WebdriverWebElement {
      * browser.driver.findElement(by.css('.parent'));
      * browser.findElement(by.css('.parent'));
      *
-     * @returns {webdriver.WebElement}
+     * @returns {webdriver.WebElementPromise}
      */
     getWebElement() {
         let id = this.elementArrayFinder_.getWebElements().then((parentWebElements) => {
@@ -1012,27 +1041,13 @@ class ElementFinder extends WebdriverWebElement {
             }
             return arr[0].isEnabled().then(() => {
                 return true; // is present, whether it is enabled or not
-            }, (err) => {
-                if (err instanceof selenium_webdriver_1.error.StaleElementReferenceError) {
-                    return false;
-                }
-                else {
-                    throw err;
-                }
-            });
-        }, (err) => {
-            if (err instanceof selenium_webdriver_1.error.NoSuchElementError) {
-                return false;
-            }
-            else {
-                throw err;
-            }
-        });
+            }, util_1.falseIfMissing);
+        }, util_1.falseIfMissing);
     }
     /**
      * Same as ElementFinder.isPresent(), except this checks whether the element
      * identified by the subLocator is present, rather than the current element
-     * finder. i.e. `element(by.css('#abc')).element(by.css('#def')).isPresent()`
+     * finder, i.e.: `element(by.css('#abc')).element(by.css('#def')).isPresent()`
      * is identical to `element(by.css('#abc')).isElementPresent(by.css('#def'))`.
      *
      * // Or using the shortcut $() notation instead of element(by.css()):

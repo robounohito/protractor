@@ -42,15 +42,20 @@ export interface Config {
         jvmArgs?: string[];
     };
     /**
-     * ChromeDriver location is used to help find the chromedriver binary.
-     * This will be passed to the Selenium jar as the system property
-     * webdriver.chrome.driver. If null, Selenium will attempt to find
-     * ChromeDriver using PATH.
+     * ChromeDriver location is used to help find the chromedriver binary. This will be passed to the
+     * Selenium jar as the system property webdriver.chrome.driver. If the value is not set when
+     * launching locally, it will use the default values downloaded from webdriver-manager.
      *
      * example:
      * chromeDriver: './node_modules/webdriver-manager/selenium/chromedriver_2.20'
      */
     chromeDriver?: string;
+    /**
+     * geckoDriver location is used to help find the gecko binary. This will be passed to the Selenium
+     * jar as the system property webdriver.gecko.driver. If the value is not set when launching
+     * locally, it will use the default values downloaded from webdriver-manager.
+     */
+    geckoDriver?: string;
     /**
      * The address of a running Selenium Server. If specified, Protractor will
      * connect to an already running instance of Selenium. This usually looks like
@@ -64,9 +69,13 @@ export interface Config {
      */
     seleniumSessionId?: string;
     /**
-     * The address of a proxy server to use for the connection to the
-     * Selenium Server. If not specified no proxy is configured. Looks like
-     * webDriverProxy: 'http://localhost:3128'
+     * The address of a proxy server to use for communicating to Sauce Labs rest APIs via the
+     * saucelabs node module. For example, the Sauce Labs Proxy can be setup with: sauceProxy:
+     * 'http://localhost:3128'
+     */
+    sauceProxy?: string;
+    /**
+     * The proxy address that browser traffic will go through which is tied to the browser session.
      */
     webDriverProxy?: string;
     /**
@@ -75,6 +84,11 @@ export interface Config {
      * without notice.
      */
     useBlockingProxy?: boolean;
+    /**
+     * If specified, Protractor will connect to the Blocking Proxy at the given
+     * url instead of starting it's own.
+     */
+    blockingProxyUrl?: string;
     /**
      * If the sauceUser and sauceKey are specified, seleniumServerJar will be
      * ignored. The tests will be run remotely using Sauce Labs.
@@ -99,6 +113,13 @@ export interface Config {
      * Use sauceBuild if you want to group test capabilites by a build ID
      */
     sauceBuild?: string;
+    /**
+     * If true, Protractor will use http:// protocol instead of https:// to
+     * connect to Sauce Labs defined by sauceSeleniumAddress.
+     *
+     * default: false
+     */
+    sauceSeleniumUseHttp?: boolean;
     /**
      * Use sauceSeleniumAddress if you need to customize the URL Protractor
      * uses to connect to sauce labs (for example, if you are tunneling selenium
@@ -404,6 +425,23 @@ export interface Config {
      */
     ignoreUncaughtExceptions?: boolean;
     /**
+     * If set, will create a log file in the given directory with a readable log of
+     * the webdriver commands it executes.
+     *
+     * This is an experimental feature. Enabling this will also turn on Blocking Proxy
+     * synchronization, which is also experimental.
+     */
+    webDriverLogDir?: string;
+    /**
+     * If set, Protractor will pause the specified amount of time (in milliseconds)
+     * before interactions with browser elements (ie, sending keys, clicking). It will
+     * also highlight the element it's about to interact with.
+     *
+     * This is an experimental feature. Enabling this will also turn on Blocking Proxy
+     * synchronization, which is also experimental.
+     */
+    highlightDelay?: number;
+    /**
      * Test framework to use. This may be one of: jasmine, mocha or custom.
      * Default value is 'jasmine'
      *
@@ -492,7 +530,34 @@ export interface Config {
      * @type {boolean}
      */
     ng12Hybrid?: boolean;
-    seleniumArgs?: Array<any>;
+    /**
+     * Protractor will exit with an error if it sees any command line flags it doesn't
+     * recognize. Set disableChecks true to disable this check.
+     */
+    disableChecks?: boolean;
+    /**
+     * Enable/disable the WebDriver Control Flow.
+     *
+     * WebDriverJS (and by extention, Protractor) uses a Control Flow to manage the order in which
+     * commands are executed and promises are resolved (see docs/control-flow.md for details).
+     * However, as syntax like `async`/`await` are being introduced, WebDriverJS has decided to
+     * deprecate the control flow, and have users manage the asynchronous activity themselves
+     * (details here: https://github.com/SeleniumHQ/selenium/issues/2969).
+     *
+     * At the moment, the WebDriver Control Flow is still enabled by default. You can disable it by
+     * setting the environment variable `SELENIUM_PROMISE_MANAGER` to `0`.  In a webdriver release in
+     * Q4 2017, the Control Flow will be disabled by default, but you will be able to re-enable it by
+     * setting `SELENIUM_PROMISE_MANAGER` to `1`.  At a later point, the control flow will be removed
+     * for good.
+     *
+     * If you don't like managing environment variables, you can set this option in your config file,
+     * and Protractor will handle enabling/disabling the control flow for you.  Setting this option
+     * is higher priority than the `SELENIUM_PROMISE_MANAGER` environment variable.
+     *
+     * @type {boolean=}
+     */
+    SELENIUM_PROMISE_MANAGER?: boolean;
+    seleniumArgs?: any[];
     jvmArgs?: string[];
     configDir?: string;
     troubleshoot?: boolean;
@@ -504,4 +569,5 @@ export interface Config {
     frameworkPath?: string;
     elementExplorer?: any;
     debug?: boolean;
+    unknownFlags_?: string[];
 }

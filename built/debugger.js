@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const net = require("net");
 const selenium_webdriver_1 = require("selenium-webdriver");
 const util = require("util");
@@ -129,10 +130,10 @@ class DebugHelper {
                         res = vm_.runInContext(code, sandbox);
                     }
                     catch (e) {
-                        res = 'Error while evaluating command: ' + e;
+                        res = selenium_webdriver_1.promise.when('Error while evaluating command: ' + e);
                     }
                     if (!selenium_webdriver_1.promise.isPromise(res)) {
-                        res = selenium_webdriver_1.promise.fulfilled(res);
+                        res = selenium_webdriver_1.promise.when(res);
                     }
                     return res.then((res) => {
                         if (res === undefined) {
@@ -196,7 +197,7 @@ class DebugHelper {
      */
     validatePortAvailability_(port) {
         if (this.debuggerValidated_) {
-            return selenium_webdriver_1.promise.fulfilled(false);
+            return selenium_webdriver_1.promise.when(false);
         }
         let doneDeferred = selenium_webdriver_1.promise.defer();
         // Resolve doneDeferred if port is available.

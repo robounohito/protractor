@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const optimist = require("optimist");
 const path = require("path");
@@ -37,10 +38,12 @@ let allowedNames = [
     'seleniumSessionId',
     'webDriverProxy',
     'useBlockingProxy',
+    'blockingProxyUrl',
     'sauceUser',
     'sauceKey',
     'sauceAgent',
     'sauceBuild',
+    'sauceSeleniumUseHttp',
     'sauceSeleniumAddress',
     'browserstackUser',
     'browserstackKey',
@@ -55,6 +58,7 @@ let allowedNames = [
     'multiCapabilities',
     'getMultiCapabilities',
     'maxSessions',
+    'verbose',
     'verboseMultiSessions',
     'baseUrl',
     'rootElement',
@@ -98,7 +102,8 @@ let allowedNames = [
     'build',
     'grep',
     'invert-grep',
-    'explorer'
+    'explorer',
+    'stackTrace'
 ];
 let optimistOptions = {
     describes: {
@@ -163,15 +168,10 @@ if (argv.version) {
     console.log('Version ' + require(path.resolve(__dirname, '../package.json')).version);
     process.exit(0);
 }
-if (!argv.disableChecks) {
-    // Check to see if additional flags were used.
-    let unknownKeys = Object.keys(argv).filter((element) => {
-        return element !== '$0' && element !== '_' && allowedNames.indexOf(element) === -1;
-    });
-    if (unknownKeys.length > 0) {
-        throw new Error('Found extra flags: ' + unknownKeys.join(', '));
-    }
-}
+// Check to see if additional flags were used.
+argv.unknownFlags_ = Object.keys(argv).filter((element) => {
+    return element !== '$0' && element !== '_' && allowedNames.indexOf(element) === -1;
+});
 /**
  * Helper to resolve comma separated lists of file pattern strings relative to
  * the cwd.
@@ -190,6 +190,16 @@ if (argv.specs) {
 }
 if (argv.exclude) {
     argv.exclude = processFilePatterns_(argv.exclude);
+}
+if (argv.capabilities && argv.capabilities.chromeOptions) {
+    // ensure that single options (which optimist parses as a string)
+    // are passed in an array in chromeOptions when required:
+    // https://sites.google.com/a/chromium.org/chromedriver/capabilities#TOC-chromeOptions-object
+    ['args', 'extensions', 'excludeSwitches', 'windowTypes'].forEach((key) => {
+        if (typeof argv.capabilities.chromeOptions[key] === 'string') {
+            argv.capabilities.chromeOptions[key] = [argv.capabilities.chromeOptions[key]];
+        }
+    });
 }
 // Use default configuration, if it exists.
 let configFile = argv._[0];

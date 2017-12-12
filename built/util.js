@@ -1,6 +1,8 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = require("path");
 const q_1 = require("q");
+const selenium_webdriver_1 = require("selenium-webdriver");
 let STACK_SUBSTRINGS_TO_FILTER = [
     'node_modules/jasmine/', 'node_modules/selenium-webdriver', 'at Module.', 'at Object.Module.',
     'at Function.Module', '(timers.js:', 'jasminewd2/index.js', 'protractor/lib/'
@@ -75,4 +77,33 @@ function joinTestLogs(log1, log2) {
     };
 }
 exports.joinTestLogs = joinTestLogs;
+/**
+ * Returns false if an error indicates a missing or stale element, re-throws
+ * the error otherwise
+ *
+ * @param {*} The error to check
+ * @throws {*} The error it was passed if it doesn't indicate a missing or stale
+ *   element
+ * @return {boolean} false, if it doesn't re-throw the error
+ */
+function falseIfMissing(error) {
+    if ((error instanceof selenium_webdriver_1.error.NoSuchElementError) ||
+        (error instanceof selenium_webdriver_1.error.StaleElementReferenceError)) {
+        return false;
+    }
+    else {
+        throw error;
+    }
+}
+exports.falseIfMissing = falseIfMissing;
+/**
+ * Return a boolean given boolean value.
+ *
+ * @param {boolean} value
+ * @returns {boolean} given value
+ */
+function passBoolean(value) {
+    return value;
+}
+exports.passBoolean = passBoolean;
 //# sourceMappingURL=util.js.map

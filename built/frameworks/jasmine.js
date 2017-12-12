@@ -63,7 +63,11 @@ exports.run = function(runner, specs) {
   var jrunner = new JasmineRunner();
   /* global jasmine */
 
-  require('jasminewd2').init(webdriver.promise.controlFlow());
+  // Don't even require JasmineWD if the control
+  // flow is turned off.
+  if (webdriver.promise.USE_PROMISE_MANAGER) {
+    require('jasminewd2').init(webdriver.promise.controlFlow(), webdriver);
+  }
 
   var jasmineNodeOpts = runner.getConfig().jasmineNodeOpts;
 
@@ -74,6 +78,9 @@ exports.run = function(runner, specs) {
   // get to complete first.
   var reporter = new RunnerReporter(runner);
   jasmine.getEnv().addReporter(reporter);
+
+  // Add hooks for afterEach
+  require('./setupAfterEach').setup(runner, specs);
 
   // Filter specs to run based on jasmineNodeOpts.grep and jasmineNodeOpts.invert.
   jasmine.getEnv().specFilter = function(spec) {

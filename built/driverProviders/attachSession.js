@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /*
  *  This is an implementation of the Attach Session Driver Provider.
  *  It is responsible for setting up the account object, tearing
@@ -43,9 +44,7 @@ class AttachSession extends driverProvider_1.DriverProvider {
      * @public
      */
     quitDriver() {
-        let defer = q.defer();
-        defer.resolve(null);
-        return defer.promise;
+        return selenium_webdriver_1.promise.when(undefined);
     }
 }
 exports.AttachSession = AttachSession;
