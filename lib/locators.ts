@@ -1,4 +1,4 @@
-import {By, promise as wdpromise, WebDriver, WebElement} from 'selenium-webdriver';
+import {By, ByHash, promise as wdpromise, WebDriver, WebElement} from 'selenium-webdriver';
 
 let clientSideScripts = require('./clientsidescripts');
 
@@ -15,7 +15,7 @@ export class WebdriverBy {
   tagName: (tagName: string) => By = By.tagName;
   xpath: (xpath: string) => By = By.xpath;
 }
-export type WebDriverLocator = By | Function;
+export type WebDriverLocator = By | ByHash | Function;
 
 // Protractor locator strategy
 export interface Locator {
