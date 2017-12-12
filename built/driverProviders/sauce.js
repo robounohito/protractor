@@ -49,16 +49,15 @@ class Sauce extends driverProvider_1.DriverProvider {
             username: this.config_.sauceUser,
             password: this.config_.sauceKey,
             agent: this.config_.sauceAgent,
-            proxy: this.config_.sauceProxy
+            proxy: this.config_.webDriverProxy
         });
         this.config_.capabilities['username'] = this.config_.sauceUser;
         this.config_.capabilities['accessKey'] = this.config_.sauceKey;
         this.config_.capabilities['build'] = this.config_.sauceBuild;
-        let protocol = this.config_.sauceSeleniumUseHttp ? 'http://' : 'https://';
-        let auth = protocol + this.config_.sauceUser + ':' + this.config_.sauceKey + '@';
-        this.config_.seleniumAddress = auth +
-            (this.config_.sauceSeleniumAddress ? this.config_.sauceSeleniumAddress :
-                'ondemand.saucelabs.com:443/wd/hub');
+        let auth = 'http://' + this.config_.sauceUser + ':' + this.config_.sauceKey + '@';
+        this.config_.seleniumAddress =
+            auth + (this.config_.sauceSeleniumAddress ? this.config_.sauceSeleniumAddress :
+                'ondemand.saucelabs.com:80/wd/hub');
         // Append filename to capabilities.name so that it's easier to identify
         // tests.
         if (this.config_.capabilities.name && this.config_.capabilities.shardTestFiles) {

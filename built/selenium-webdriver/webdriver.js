@@ -250,16 +250,13 @@ webdriver.WebDriver.prototype.executeAsyncScript = (script, var_args) => {};
 webdriver.WebDriver.prototype.call = function(fn, opt_scope, var_args) {};
 
 /**
- * Schedules a command to wait for a condition to hold or {@link
- * webdriver.promise.Promise promise} to be resolved.
+ * Schedules a command to wait for a condition to hold.
  *
- * This function blocks WebDriver's control flow, not the javascript runtime.
- * It will only delay future webdriver commands from being executed (e.g. it
- * will cause Protractor to wait before sending future commands to the selenium
- * server), and only when the webdriver control flow is enabled.
- *
- * This function returnes a promise, which can be used if you need to block
- * javascript execution and not just the control flow.
+ * This function may be used to block the command flow on the resolution
+ * of a {@link webdriver.promise.Promise promise}. When given a promise, the
+ * command will simply wait for its resolution before completing. A timeout may
+ * be provided to fail the command if the promise does not resolve before the
+ * timeout expires.
  *
  * See also {@link ExpectedConditions}
  *
@@ -277,7 +274,7 @@ webdriver.WebDriver.prototype.call = function(fn, opt_scope, var_args) {};
  *           function(!webdriver.WebDriver): T)} condition The condition to
  *     wait on, defined as a promise, condition object, or  a function to
  *     evaluate as a condition.
- * @param {number=} opt_timeout How long to wait for the condition to be true. Will default 30 seconds, or to the jasmineNodeOpts.defaultTimeoutInterval in your protractor.conf.js file.
+ * @param {number=} opt_timeout How long to wait for the condition to be true.
  * @param {string=} opt_message An optional message to use if the wait times
  *     out.
  * @returns {!webdriver.promise.Promise<T>} A promise that will be fulfilled
@@ -419,6 +416,14 @@ webdriver.WebElement.prototype.getDriver = function() {};
 webdriver.WebElement.prototype.getId = function() {};
 
 /**
+ * Returns a promise for the web element's serialized representation.
+ *
+ * @returns {!webdriver.promise.Promise.<webdriver.WebElement.Id>}
+ *     This instance's serialized wire format.
+ */
+webdriver.WebElement.prototype.serialize = function() {};
+
+/**
  * Use {@link ElementFinder.prototype.element} instead
  *
  * @see ElementFinder.prototype.element
@@ -533,7 +538,8 @@ webdriver.WebElement.prototype.getTagName = function() {};
  * <span style='color: #000000'>{{person.name}}</span>
  *
  * @example
- * expect(element(by.binding('person.name')).getCssValue('color')).toBe('#000000');
+ * expect(element(by.binding('person.name')).getCssValue().indexOf(
+ *   'color: #000000')).not.toBe(-1);
  *
  * @param {string} cssStyleProperty The name of the CSS style property to look
  *     up.

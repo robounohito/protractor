@@ -71,31 +71,6 @@ class Local extends driverProvider_1.DriverProvider {
                 }
             }
         }
-        if (this.config_.capabilities.browserName === 'firefox') {
-            if (!this.config_.geckoDriver) {
-                logger.debug('Attempting to find the gecko driver binary in the default ' +
-                    'location used by webdriver-manager');
-                try {
-                    let updateJson = path.resolve(SeleniumConfig.getSeleniumDir(), 'update-config.json');
-                    let updateConfig = JSON.parse(fs.readFileSync(updateJson).toString());
-                    this.config_.geckoDriver = updateConfig.gecko.last;
-                }
-                catch (err) {
-                    throw new exitCodes_1.BrowserError(logger, 'No update-config.json found. ' +
-                        'Run \'webdriver-manager update\' to download binaries.');
-                }
-            }
-            // Check if file exists, if not try .exe or fail accordingly
-            if (!fs.existsSync(this.config_.geckoDriver)) {
-                if (fs.existsSync(this.config_.geckoDriver + '.exe')) {
-                    this.config_.geckoDriver += '.exe';
-                }
-                else {
-                    throw new exitCodes_1.BrowserError(logger, 'Could not find gecko driver at ' + this.config_.geckoDriver +
-                        '. Run \'webdriver-manager update\' to download binaries.');
-                }
-            }
-        }
     }
     /**
      * Configure and launch (if applicable) the object's environment.
@@ -104,6 +79,7 @@ class Local extends driverProvider_1.DriverProvider {
      *     ready to test.
      */
     setupDriverEnv() {
+        let deferred = q.defer();
         this.addDefaultBinaryLocs_();
         logger.info('Starting selenium standalone server...');
         let serverConf = this.config_.localSeleniumStandaloneOpts || {};
@@ -115,11 +91,6 @@ class Local extends driverProvider_1.DriverProvider {
         if (serverConf.jvmArgs === undefined) {
             serverConf.jvmArgs = this.config_.jvmArgs || [];
         }
-        else {
-            if (!Array.isArray(serverConf.jvmArgs)) {
-                throw new exitCodes_1.ConfigError(logger, 'jvmArgs should be an array.');
-            }
-        }
         if (serverConf.port === undefined) {
             serverConf.port = this.config_.seleniumPort;
         }
@@ -128,19 +99,13 @@ class Local extends driverProvider_1.DriverProvider {
             serverConf.jvmArgs.push('-Dwebdriver.chrome.driver=' + this.config_.chromeDriver);
         }
         this.server_ = new remote.SeleniumServer(this.config_.seleniumServerJar, serverConf);
-        let deferred = q.defer();
         // start local server, grab hosted address, and resolve promise
-        this.server_.start(this.config_.seleniumServerStartTimeout)
-            .then((url) => {
+        this.server_.start(this.config_.seleniumServerStartTimeout).then((url) => {
             logger.info('Selenium standalone server started at ' + url);
-            return this.server_.address();
-        })
-            .then((address) => {
-            this.config_.seleniumAddress = address;
-            deferred.resolve();
-        })
-            .catch((err) => {
-            deferred.reject(err);
+            this.server_.address().then((address) => {
+                this.config_.seleniumAddress = address;
+                deferred.resolve();
+            });
         });
         return deferred.promise;
     }
@@ -154,10 +119,14 @@ class Local extends driverProvider_1.DriverProvider {
      *     is down.
      */
     teardownEnv() {
-        return super.teardownEnv().then(() => {
+        let deferred = q.defer();
+        super.teardownEnv().then(() => {
             logger.info('Shutting down selenium standalone server.');
-            return this.server_.stop();
+            this.server_.stop().then(() => {
+                deferred.resolve();
+            });
         });
+        return deferred.promise;
     }
 }
 exports.Local = Local;

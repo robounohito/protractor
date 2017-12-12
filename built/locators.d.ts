@@ -1,24 +1,20 @@
-import { By, ByHash, promise as wdpromise, WebDriver, WebElement } from 'selenium-webdriver';
+import { By, promise as wdpromise, WebDriver, WebElement } from 'selenium-webdriver';
 export declare class WebdriverBy {
     className: (className: string) => By;
     css: (css: string) => By;
     id: (id: string) => By;
     linkText: (linkText: string) => By;
-    js: (js: string | Function, ...var_args: any[]) => By;
+    js: (js: string) => By;
     name: (name: string) => By;
     partialLinkText: (partialText: string) => By;
     tagName: (tagName: string) => By;
     xpath: (xpath: string) => By;
 }
-export declare type WebDriverLocator = By | ByHash | Function;
-export interface ProtractorLocator {
-    findElementsOverride: (driver: WebDriver, using: WebElement, rootSelector: string) => wdpromise.Promise<WebElement[]>;
+export interface Locator {
+    findElementsOverride?: (driver: WebDriver, using: WebElement, rootSelector: string) => wdpromise.Promise<WebElement[]>;
     row?: (index: number) => Locator;
     column?: (index: string) => Locator;
-    toString?: () => string;
 }
-export declare type Locator = ProtractorLocator | WebDriverLocator;
-export declare function isProtractorLocator(x: Locator): x is ProtractorLocator;
 /**
  * The Protractor Locators. These provide ways of finding elements in
  * Angular applications by binding, model, etc.
@@ -91,9 +87,9 @@ export declare class ProtractorBy extends WebdriverBy {
      * var deprecatedSyntax = element(by.binding('{{person.name}}'));
      *
      * @param {string} bindingDescriptor
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
-    binding(bindingDescriptor: string): ProtractorLocator;
+    binding(bindingDescriptor: string): Locator;
     /**
      * Find an element by exact binding.
      *
@@ -111,9 +107,9 @@ export declare class ProtractorBy extends WebdriverBy {
      * expect(element(by.exactBinding('phone')).isPresent()).toBe(false);
      *
      * @param {string} bindingDescriptor
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
-    exactBinding(bindingDescriptor: string): ProtractorLocator;
+    exactBinding(bindingDescriptor: string): Locator;
     /**
      * Find an element by ng-model expression.
      *
@@ -127,9 +123,9 @@ export declare class ProtractorBy extends WebdriverBy {
      * expect(input.getAttribute('value')).toBe('Foo123');
      *
      * @param {string} model ng-model expression.
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
-    model(model: string): ProtractorLocator;
+    model(model: string): Locator;
     /**
      * Find a button by text.
      *
@@ -140,9 +136,9 @@ export declare class ProtractorBy extends WebdriverBy {
      * element(by.buttonText('Save'));
      *
      * @param {string} searchText
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
-    buttonText(searchText: string): ProtractorLocator;
+    buttonText(searchText: string): Locator;
     /**
      * Find a button by partial text.
      *
@@ -153,9 +149,9 @@ export declare class ProtractorBy extends WebdriverBy {
      * element(by.partialButtonText('Save'));
      *
      * @param {string} searchText
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
-    partialButtonText(searchText: string): ProtractorLocator;
+    partialButtonText(searchText: string): Locator;
     private byRepeaterInner(exact, repeatDescriptor);
     /**
      * Find elements inside an ng-repeat.
@@ -209,9 +205,9 @@ export declare class ProtractorBy extends WebdriverBy {
      * var divs = element.all(by.repeater('book in library'));
      *
      * @param {string} repeatDescriptor
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
-    repeater(repeatDescriptor: string): ProtractorLocator;
+    repeater(repeatDescriptor: string): Locator;
     /**
      * Find an element by exact repeater.
      *
@@ -228,9 +224,9 @@ export declare class ProtractorBy extends WebdriverBy {
      * expect(element(by.exactRepeater('car in cars')).isPresent()).toBe(true);
      *
      * @param {string} repeatDescriptor
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
-    exactRepeater(repeatDescriptor: string): ProtractorLocator;
+    exactRepeater(repeatDescriptor: string): Locator;
     /**
      * Find elements by CSS which contain a certain string.
      *
@@ -245,10 +241,10 @@ export declare class ProtractorBy extends WebdriverBy {
      * var dog = element(by.cssContainingText('.pet', 'Dog'));
      *
      * @param {string} cssSelector css selector
-     * @param {string|RegExp} searchString text search
-     * @returns {ProtractorLocator} location strategy
+     * @param {string} searchString text search
+     * @returns {Locator} location strategy
      */
-    cssContainingText(cssSelector: string, searchText: string | RegExp): ProtractorLocator;
+    cssContainingText(cssSelector: string, searchText: string): Locator;
     /**
      * Find an element by ng-options expression.
      *
@@ -266,9 +262,9 @@ export declare class ProtractorBy extends WebdriverBy {
      * expect(firstOption.getText()).toEqual('red');
      *
      * @param {string} optionsDescriptor ng-options expression.
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
-    options(optionsDescriptor: string): ProtractorLocator;
+    options(optionsDescriptor: string): Locator;
     /**
      * Find an element by css selector within the Shadow DOM.
      *

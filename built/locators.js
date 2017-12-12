@@ -3,8 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const selenium_webdriver_1 = require("selenium-webdriver");
 let clientSideScripts = require('./clientsidescripts');
 // Explicitly define webdriver.By.
-// We do this because we want to inherit the static methods of webdriver.By, as opposed to
-// inheriting from the webdriver.By class itself, which is actually analogous to ProtractorLocator.
 class WebdriverBy {
     constructor() {
         this.className = selenium_webdriver_1.By.className;
@@ -19,10 +17,6 @@ class WebdriverBy {
     }
 }
 exports.WebdriverBy = WebdriverBy;
-function isProtractorLocator(x) {
-    return x && (typeof x.findElementsOverride === 'function');
-}
-exports.isProtractorLocator = isProtractorLocator;
 /**
  * The Protractor Locators. These provide ways of finding elements in
  * Angular applications by binding, model, etc.
@@ -113,7 +107,7 @@ class ProtractorBy extends WebdriverBy {
      * var deprecatedSyntax = element(by.binding('{{person.name}}'));
      *
      * @param {string} bindingDescriptor
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
     binding(bindingDescriptor) {
         return {
@@ -143,7 +137,7 @@ class ProtractorBy extends WebdriverBy {
      * expect(element(by.exactBinding('phone')).isPresent()).toBe(false);
      *
      * @param {string} bindingDescriptor
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
     exactBinding(bindingDescriptor) {
         return {
@@ -169,7 +163,7 @@ class ProtractorBy extends WebdriverBy {
      * expect(input.getAttribute('value')).toBe('Foo123');
      *
      * @param {string} model ng-model expression.
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
     model(model) {
         return {
@@ -192,7 +186,7 @@ class ProtractorBy extends WebdriverBy {
      * element(by.buttonText('Save'));
      *
      * @param {string} searchText
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
     buttonText(searchText) {
         return {
@@ -215,7 +209,7 @@ class ProtractorBy extends WebdriverBy {
      * element(by.partialButtonText('Save'));
      *
      * @param {string} searchText
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
     partialButtonText(searchText) {
         return {
@@ -334,7 +328,7 @@ class ProtractorBy extends WebdriverBy {
      * var divs = element.all(by.repeater('book in library'));
      *
      * @param {string} repeatDescriptor
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
     repeater(repeatDescriptor) {
         return this.byRepeaterInner(false, repeatDescriptor);
@@ -355,7 +349,7 @@ class ProtractorBy extends WebdriverBy {
      * expect(element(by.exactRepeater('car in cars')).isPresent()).toBe(true);
      *
      * @param {string} repeatDescriptor
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
     exactRepeater(repeatDescriptor) {
         return this.byRepeaterInner(true, repeatDescriptor);
@@ -374,11 +368,10 @@ class ProtractorBy extends WebdriverBy {
      * var dog = element(by.cssContainingText('.pet', 'Dog'));
      *
      * @param {string} cssSelector css selector
-     * @param {string|RegExp} searchString text search
-     * @returns {ProtractorLocator} location strategy
+     * @param {string} searchString text search
+     * @returns {Locator} location strategy
      */
     cssContainingText(cssSelector, searchText) {
-        searchText = (searchText instanceof RegExp) ? '__REGEXP__' + searchText.toString() : searchText;
         return {
             findElementsOverride: (driver, using, rootSelector) => {
                 return driver.findElements(selenium_webdriver_1.By.js(clientSideScripts.findByCssContainingText, cssSelector, searchText, using, rootSelector));
@@ -406,7 +399,7 @@ class ProtractorBy extends WebdriverBy {
      * expect(firstOption.getText()).toEqual('red');
      *
      * @param {string} optionsDescriptor ng-options expression.
-     * @returns {ProtractorLocator} location strategy
+     * @returns {Locator} location strategy
      */
     options(optionsDescriptor) {
         return {

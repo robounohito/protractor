@@ -4,7 +4,6 @@ const q = require("q");
 const webdriver = require("selenium-webdriver");
 const configParser_1 = require("./configParser");
 const logger_1 = require("./logger");
-const ptor_1 = require("./ptor");
 let logger = new logger_1.Logger('plugins');
 var PromiseType;
 (function (PromiseType) {
@@ -203,15 +202,8 @@ class Plugins {
                 logError(e);
             }
         };
-        if (promiseType == PromiseType.Q) {
-            return q.Promise(resolver);
-        }
-        else if (ptor_1.protractor.browser.controlFlowIsEnabled()) {
-            return new webdriver.promise.Promise(resolver);
-        }
-        else {
-            return new Promise(resolver);
-        }
+        return promiseType == PromiseType.Q ? q.Promise(resolver) :
+            new webdriver.promise.Promise(resolver);
     }
     pluginFunFactory(funName, promiseType, failReturnVal) {
         return (...args) => {

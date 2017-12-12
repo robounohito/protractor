@@ -1,6 +1,6 @@
 /// <reference types="q" />
 import * as q from 'q';
-import { promise as wdpromise, WebDriver } from 'selenium-webdriver';
+import { WebDriver } from 'selenium-webdriver';
 import { Config } from '../config';
 import { DriverProvider } from './driverProvider';
 export declare class AttachSession extends DriverProvider {
@@ -23,5 +23,5 @@ export declare class AttachSession extends DriverProvider {
      *
      * @public
      */
-    quitDriver(): wdpromise.Promise<void>;
+    quitDriver(): q.Promise<WebDriver>;
 }

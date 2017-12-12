@@ -130,10 +130,10 @@ class DebugHelper {
                         res = vm_.runInContext(code, sandbox);
                     }
                     catch (e) {
-                        res = selenium_webdriver_1.promise.when('Error while evaluating command: ' + e);
+                        res = 'Error while evaluating command: ' + e;
                     }
                     if (!selenium_webdriver_1.promise.isPromise(res)) {
-                        res = selenium_webdriver_1.promise.when(res);
+                        res = selenium_webdriver_1.promise.fulfilled(res);
                     }
                     return res.then((res) => {
                         if (res === undefined) {
@@ -197,7 +197,7 @@ class DebugHelper {
      */
     validatePortAvailability_(port) {
         if (this.debuggerValidated_) {
-            return selenium_webdriver_1.promise.when(false);
+            return selenium_webdriver_1.promise.fulfilled(false);
         }
         let doneDeferred = selenium_webdriver_1.promise.defer();
         // Resolve doneDeferred if port is available.

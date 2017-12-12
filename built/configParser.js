@@ -103,9 +103,7 @@ class ConfigParser {
     addConfig_(additionalConfig, relativeTo) {
         // All filepaths should be kept relative to the current config location.
         // This will not affect absolute paths.
-        ['seleniumServerJar', 'chromeDriver', 'firefoxPath', 'frameworkPath', 'geckoDriver',
-            'onPrepare']
-            .forEach((name) => {
+        ['seleniumServerJar', 'chromeDriver', 'onPrepare', 'firefoxPath', 'frameworkPath'].forEach((name) => {
             if (additionalConfig[name] && typeof additionalConfig[name] === 'string') {
                 additionalConfig[name] = path.resolve(relativeTo, additionalConfig[name]);
             }
@@ -190,8 +188,8 @@ let makeArray = function (item) {
  * Adds to an array all the elements in another array without adding any
  * duplicates
  *
- * @param {string[]} dest The array to add to
- * @param {string[]} src The array to copy from
+ * @param {Array<string>} dest The array to add to
+ * @param {Array<string>} src The array to copy from
  */
 let union = function (dest, src) {
     let elems = {};

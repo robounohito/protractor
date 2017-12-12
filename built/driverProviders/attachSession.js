@@ -44,7 +44,9 @@ class AttachSession extends driverProvider_1.DriverProvider {
      * @public
      */
     quitDriver() {
-        return selenium_webdriver_1.promise.when(undefined);
+        let defer = q.defer();
+        defer.resolve(null);
+        return defer.promise;
     }
 }
 exports.AttachSession = AttachSession;

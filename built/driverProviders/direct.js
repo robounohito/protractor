@@ -77,23 +77,13 @@ class Direct extends driverProvider_1.DriverProvider {
                         .Driver.createSession(new selenium_webdriver_1.Capabilities(this.config_.capabilities), chromeService);
                 break;
             case 'firefox':
-                let geckoDriverFile;
-                try {
-                    let updateJson = path.resolve(SeleniumConfig.getSeleniumDir(), 'update-config.json');
-                    let updateConfig = JSON.parse(fs.readFileSync(updateJson).toString());
-                    geckoDriverFile = updateConfig.gecko.last;
+                if (this.config_.firefoxPath) {
+                    this.config_.capabilities['firefox_binary'] = this.config_.firefoxPath;
                 }
-                catch (e) {
-                    throw new exitCodes_1.BrowserError(logger, 'Could not find update-config.json. ' +
-                        'Run \'webdriver-manager update\' to download binaries.');
-                }
-                // TODO (mgiambalvo): Turn this into an import when the selenium typings are updated.
-                const FirefoxServiceBuilder = require('selenium-webdriver/firefox').ServiceBuilder;
-                let firefoxService = new FirefoxServiceBuilder(geckoDriverFile).build();
-                // TODO(mgiambalvo): Fix typings.
-                driver =
-                    require('selenium-webdriver/firefox')
-                        .Driver.createSession(new selenium_webdriver_1.Capabilities(this.config_.capabilities), firefoxService);
+                // TODO(cnishina): Add in a service builder with marionette. Direct connect
+                // currently supports FF legacy version 47.
+                driver = require('selenium-webdriver/firefox')
+                    .Driver.createSession(new selenium_webdriver_1.Capabilities(this.config_.capabilities));
                 break;
             default:
                 throw new exitCodes_1.BrowserError(logger, 'browserName ' + this.config_.capabilities.browserName +
