@@ -31,6 +31,8 @@ var locators_1 = require("./locators");
 exports.ProtractorBy = locators_1.ProtractorBy;
 var ptor_1 = require("./ptor");
 exports.Ptor = ptor_1.Ptor;
+var runner_1 = require("./runner");
+exports.Runner = runner_1.Runner;
 exports.utils = {
     firefox: require('selenium-webdriver/firefox'),
     http: require('selenium-webdriver/http'),
