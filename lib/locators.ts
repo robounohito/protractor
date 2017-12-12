@@ -15,6 +15,7 @@ export class WebdriverBy {
   tagName: (tagName: string) => By = By.tagName;
   xpath: (xpath: string) => By = By.xpath;
 }
+export type WebDriverLocator = By | Function;
 
 // Protractor locator strategy
 export interface Locator {

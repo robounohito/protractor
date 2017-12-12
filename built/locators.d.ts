@@ -10,6 +10,7 @@ export declare class WebdriverBy {
     tagName: (tagName: string) => By;
     xpath: (xpath: string) => By;
 }
+export declare type WebDriverLocator = By | Function;
 export interface Locator {
     findElementsOverride?: (driver: WebDriver, using: WebElement, rootSelector: string) => wdpromise.Promise<WebElement[]>;
     row?: (index: number) => Locator;
