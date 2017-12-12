@@ -4,6 +4,7 @@ import { Locator } from './locators';
 export declare class WebdriverWebElement {
 }
 export interface WebdriverWebElement extends WebElement {
+    [key: string]: any;
 }
 /**
  * ElementArrayFinder is used for operations on an array of elements (as opposed
@@ -159,7 +160,7 @@ export declare class ElementArrayFinder extends WebdriverWebElement {
      * array
      *     of element that satisfy the filter function.
      */
-    filter(filterFn: Function): ElementArrayFinder;
+    filter(filterFn: (element: ElementFinder, index?: number) => boolean | wdpromise.Promise<boolean>): ElementArrayFinder;
     /**
      * Get an element within the ElementArrayFinder by index. The index starts at
      * 0\. Negative indices are wrapped (i.e. -i means ith element from last)
@@ -300,6 +301,17 @@ export declare class ElementArrayFinder extends WebdriverWebElement {
      */
     count(): wdpromise.Promise<number>;
     /**
+     * Returns true if there are any elements present that match the finder.
+     *
+     * @alias element.all(locator).isPresent()
+     *
+     * @example
+     * expect($('.item').isPresent()).toBeTruthy();
+     *
+     * @returns {Promise<boolean>}
+     */
+    isPresent(): wdpromise.Promise<boolean>;
+    /**
      * Returns the most relevant locator.
      *
      * @example
@@ -332,7 +344,7 @@ export declare class ElementArrayFinder extends WebdriverWebElement {
      * @returns {Array.<ElementFinder>} Return a promise, which resolves to a list
      *     of ElementFinders specified by the locator.
      */
-    asElementFinders_(): wdpromise.Promise<any>;
+    asElementFinders_(): wdpromise.Promise<ElementFinder[]>;
     /**
      * Retrieve the elements represented by the ElementArrayFinder. The input
      * function is passed to the resulting promise, which resolves to an
@@ -363,7 +375,7 @@ export declare class ElementArrayFinder extends WebdriverWebElement {
      * @returns {!webdriver.promise.Promise} A promise which will resolve to
      *     an array of ElementFinders represented by the ElementArrayFinder.
      */
-    then(fn?: (value: ElementFinder[]) => any | wdpromise.IThenable<any>, errorFn?: (error: any) => any): wdpromise.Promise<any>;
+    then<T>(fn?: (value: ElementFinder[] | any[]) => T | wdpromise.IThenable<T>, errorFn?: (error: any) => any): wdpromise.Promise<T>;
     /**
      * Calls the input function on each ElementFinder represented by the
      * ElementArrayFinder.
@@ -447,7 +459,7 @@ export declare class ElementArrayFinder extends WebdriverWebElement {
      * @returns {!webdriver.promise.Promise} A promise that resolves to an array
      *     of values returned by the map function.
      */
-    map(mapFn: (elementFinder?: ElementFinder, index?: number) => any): wdpromise.Promise<any>;
+    map<T>(mapFn: (elementFinder?: ElementFinder, index?: number) => T | any): wdpromise.Promise<T[]>;
     /**
      * Apply a reduce function against an accumulator and every element found
      * using the locator (from left-to-right). The reduce function has to reduce
@@ -613,7 +625,7 @@ export declare class ElementFinder extends WebdriverWebElement {
      * browser.driver.findElement(by.css('.parent'));
      * browser.findElement(by.css('.parent'));
      *
-     * @returns {webdriver.WebElement}
+     * @returns {webdriver.WebElementPromise}
      */
     getWebElement(): WebElementPromise;
     /**
@@ -764,7 +776,7 @@ export declare class ElementFinder extends WebdriverWebElement {
     /**
      * Same as ElementFinder.isPresent(), except this checks whether the element
      * identified by the subLocator is present, rather than the current element
-     * finder. i.e. `element(by.css('#abc')).element(by.css('#def')).isPresent()`
+     * finder, i.e.: `element(by.css('#abc')).element(by.css('#def')).isPresent()`
      * is identical to `element(by.css('#abc')).isElementPresent(by.css('#def'))`.
      *
      * // Or using the shortcut $() notation instead of element(by.css()):
@@ -830,7 +842,7 @@ export declare class ElementFinder extends WebdriverWebElement {
  * @returns {ElementFinder} which identifies the located
  *     {@link webdriver.WebElement}
  */
-export declare let build$: (element: ElementHelper, by: typeof By) => (selector: string) => any;
+export declare let build$: (element: ElementHelper, by: typeof By) => (selector: string) => ElementFinder;
 /**
  * Shortcut for querying the document directly with css.
  * `element.all(by.css('.abc'))` is equivalent to `$$('.abc')`
@@ -856,4 +868,4 @@ export declare let build$: (element: ElementHelper, by: typeof By) => (selector:
  * @returns {ElementArrayFinder} which identifies the
  *     array of the located {@link webdriver.WebElement}s.
  */
-export declare let build$$: (element: ElementHelper, by: typeof By) => (selector: string) => any;
+export declare let build$$: (element: ElementHelper, by: typeof By) => (selector: string) => ElementArrayFinder;
